@@ -1,10 +1,14 @@
 package server;
 
+import Data.Info;
+import Data.Message;
 import org.glassfish.tyrus.server.Server;
 
 public class ServerStart {
     public static void main(String[] args) {
-        Server server = new Server("localhost", 8080, "/MLP",null, WebSocketServer.class);
+        WebSocketServer wss=new WebSocketServer();
+        wss.Init(8080,new Info(),new Message());
+        Server server = new Server("localhost", 8080, "/",null, wss.getClass());
 
         try {
             server.start();

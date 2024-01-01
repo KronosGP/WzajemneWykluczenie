@@ -1,4 +1,4 @@
-package klient.MLP;
+package Data.MLP;
 
 public class Warstwa {
     Neuron[] neurony;
