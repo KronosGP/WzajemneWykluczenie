@@ -6,6 +6,7 @@ import Data.Message;
 import java.io.IOException;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Random;
 
 public class UdpStart {
     private int port;
@@ -53,7 +54,7 @@ public class UdpStart {
                                     System.out.println(temp[2]);
                                     InetAddress clientAddres = InetAddress.getByName(receivePacket.getAddress().getHostAddress());
                                     int clientPort = receivePacket.getPort();
-                                    String respone = "UDP;GUI;SERVER_WORK;";
+                                    String respone = "UDP;GUI;SERVER_WORK;127.0.0."+ip;
                                     byte[] sendData = respone.getBytes(StandardCharsets.UTF_8);
                                     sendPacket = new DatagramPacket(sendData, sendData.length, clientAddres, clientPort);
                                     udpSocket.send(sendPacket);
@@ -89,10 +90,11 @@ public class UdpStart {
         String newMsg="UDP;IS_SERVER;CHECK";
         byte[] sendData= newMsg.getBytes(StandardCharsets.UTF_8);
         sendPacket= new DatagramPacket(sendData,sendData.length,brdcast,clientPort);
+        Random rn=new Random();
         udpSocket.send(sendPacket);
         new Thread(()->{
             try {
-                Thread.sleep(5000+(10-info.getConnNumber())*100);
+                Thread.sleep(5000+rn.nextInt(1000));
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -118,7 +120,7 @@ public class UdpStart {
         udpSocket.send(sendPacket);
         th2=new Thread(()->{
             try {
-                Thread.sleep(5000);
+                Thread.sleep(5000+(10-info.getConnNumber())*100);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

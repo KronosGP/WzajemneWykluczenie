@@ -275,7 +275,7 @@ public class startGUI extends JFrame {
                        info.setImServer(true);
                        msg.ClearValue();
                        try {
-                           Thread.sleep(100);
+                           Thread.sleep(200);
                            udp.sendIP();
                        } catch (IOException | InterruptedException e) {
                            throw new RuntimeException(e);
