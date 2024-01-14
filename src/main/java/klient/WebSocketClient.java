@@ -72,7 +72,6 @@ public class WebSocketClient {
         System.out.println("Sesja WebSocket została zamknięta. Powód: " + reason.toString());
         msg.setService("GUI");
         msg.setSubject("SERVER_STOP");
-        // Dodatkowa logika obsługi zamknięcia sesji, jeśli to konieczne
     }
 
     @OnError

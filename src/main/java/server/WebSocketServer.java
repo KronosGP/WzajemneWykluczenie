@@ -53,40 +53,8 @@ public class WebSocketServer {
             int idTicket=checkNumber(session,true);
             if (idTicket == 0) {
                 session.getBasicRemote().sendText("ACCEPTED");
-                //sekcja krytyczna
-                lamportLock.lock();
-                try {
-                    lamportClock++;
-                    th = new Thread(() -> {
-                        try {
-                            Session save= session;
+                critic(session);
 
-                            Gson gsn = new Gson();
-
-                            int[] tab = new int[3];
-                            tab[0] = 20;
-                            tab[1] = 15;
-                            tab[2] = 3;
-                            Siec s = new Siec(64, 3, tab);
-                            t = new Teach(s);
-
-                            System.out.println("Nauka rozpoczęta");
-                            t.runQueries();
-                            String respone = gsn.toJson(s);
-
-                                System.out.println(save);
-                                save.getBasicRemote().sendText("SIEC_SET " + respone);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-                    th.start();
-                }
-                finally {
-                    lamportLock.unlock();
-                }
             }
             else{
                 if(sessions.contains(session))
@@ -107,8 +75,6 @@ public class WebSocketServer {
             session.getBasicRemote().sendText("SET_TICKET "+ticket);
             sessions.add(session);
         }
-
-
     }
 
     @OnClose
@@ -175,35 +141,45 @@ public class WebSocketServer {
             }
         }).start();
     }
+    private void critic(Session session) {
+        //sekcja krytyczna
+        lamportLock.lock();
+        try {
+            lamportClock++;
+            th = new Thread(() -> {
+                try {
+                    Session save= session;
+
+                    Gson gsn = new Gson();
+
+                    int[] tab = new int[3];
+                    tab[0] = 20;
+                    tab[1] = 15;
+                    tab[2] = 3;
+                    Siec s = new Siec(64, 3, tab);
+                    t = new Teach(s);
+
+                    System.out.println("Nauka rozpoczęta");
+                    t.runQueries();
+                    String respone = gsn.toJson(s);
+
+                    System.out.println(save);
+                    save.getBasicRemote().sendText("SIEC_SET " + respone);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            th.start();
+        }
+        finally {
+            lamportLock.unlock();
+        }
+    }
 
     public void closeServer(){
         broadcast("SERVER_DISCONECT",null,false);
         isWorking=false;
-    }
-
-    public void learn() {
-
-        try {
-
-            Gson gsn = new Gson();
-
-            int[] tab = new int[3];
-            tab[0] = 20;
-            tab[1] = 15;
-            tab[2] = 3;
-            Siec s = new Siec(64, 3, tab);
-            t = new Teach(s);
-
-            System.out.println("Nauka rozpoczęta");
-            t.runQueries();
-            String respone = gsn.toJson(s);
-
-            msg.setService("GUI");
-            msg.setSubject("NETWORK");
-            msg.setMsg(respone);
-
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

@@ -27,7 +27,7 @@ public class startGUI extends JFrame {
     private final JButton Learn;
 
     private final MyComponent komponent;
-    private final JLabel wyjscie,poprawnosc,ticket,conn;
+    private final JLabel wyjscie,ticket,conn;
     private final JFrame frame;
     private static class MyComponent extends JPanel implements MouseListener, MouseMotionListener {
         private boolean p;
@@ -187,15 +187,12 @@ public class startGUI extends JFrame {
         add(Clean);
 
         wyjscie=new JLabel("Jaka Litera?");
-        poprawnosc=new JLabel("Poprawność");
         ticket=new JLabel("Numer biletu: ");
         conn=new JLabel("Numer połączenia: ");
         wyjscie.setBounds(10,getHeight()*2/3+50,getWidth()/2-20,25);
         conn.setBounds(getWidth()/2+10,getHeight()*2/3+50,getWidth()/2-20,25);
-        poprawnosc.setBounds(10,getHeight()*2/3+80,getWidth()/2-20,25);
         ticket.setBounds(getWidth()/2+10,getHeight()*2/3+80,getWidth()/2-20,25);
         add(wyjscie);
-        add(poprawnosc);
         add(conn);
         add(ticket);
 
@@ -229,7 +226,7 @@ public class startGUI extends JFrame {
         info=new Info();
         msg=new Message();
 
-        udp=new UdpStart(4444, info,msg,i);
+        udp=new UdpStart(4444, info,msg,i,true);
         udp.startServer();
         th =new Thread(()->{
             try {
@@ -259,7 +256,7 @@ public class startGUI extends JFrame {
                    } else if (msg.getSubject().equals("DISABLE")) {
                        new Thread(()->JOptionPane.showMessageDialog(this,"Nauka rozpoczeta")).start();
                        Learn.setEnabled(false);
-                       Learn.setText("Bilet");
+                       //Learn.setText("Bilet");
                        msg.ClearValue();
                    } else if(msg.getSubject().equals("NETWORK")){
                        Gson gsn = new Gson();
@@ -273,6 +270,7 @@ public class startGUI extends JFrame {
                        WSS.Init(8080,info,msg);
                        WSS.start();
                        info.setImServer(true);
+                       info.setTicketNumber(-1);
                        msg.ClearValue();
                        try {
                            Thread.sleep(200);
@@ -285,6 +283,7 @@ public class startGUI extends JFrame {
                    else if(msg.getSubject().equals("SERVER_STOP")){
                        try {
                            info.setServerWSIp(null);
+                           info.setTicketNumber(-1);
                            WSC.stop();
                            WSC=null;
                            udp.tiran(info.getConnNumber());
@@ -333,21 +332,12 @@ public class startGUI extends JFrame {
     private class learn implements ActionListener{
         @Override
         public void actionPerformed(ActionEvent e) {
-                if(info.getTicketNumber()<0)
-                    try {
-                        WSC.getTicket();
-                        Learn.setText("Ucz");
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                else {
-                    try {
-                        WSC.learn();
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex);
-                    } catch (EncodeException ex) {
-                        throw new RuntimeException(ex);
-                    }
+            if(info.getTicketNumber()<0)
+                try {
+                    WSC.getTicket();
+                    //Learn.setText("Ucz");
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
                 }
         }
     }

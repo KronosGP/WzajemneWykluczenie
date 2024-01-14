@@ -17,11 +17,14 @@ public class UdpStart {
     private DatagramPacket receivePacket;
     private Thread th,th2;
     private boolean Win=true;
+    private boolean Alive=true;
+    private boolean debug=false;
     private int ip;
-    public UdpStart(int port, Info info, Message msg, int i) {
+    public UdpStart(int port, Info info, Message msg, int i, boolean debug) {
         this.info=info;
         this.msg=msg;
         this.port=port;
+        this.debug=debug;
         ip=i;
     }
 
@@ -29,11 +32,11 @@ public class UdpStart {
         th=new Thread(() -> {
             try {
 
-                udpSocket = new DatagramSocket(port,InetAddress.getByName("127.0.0."+ip));
+                udpSocket = (debug)?new DatagramSocket(port,InetAddress.getByName("127.0.0."+ip)):new DatagramSocket(port);
                 udpSocket.setBroadcast(true);
                 byte[] receiveData = new byte[1024];
 
-                while (true) {
+                while (Alive) {
                     receivePacket = new DatagramPacket(receiveData, receiveData.length);
 
                     udpSocket.receive(receivePacket);
@@ -45,16 +48,14 @@ public class UdpStart {
                             msg.setService(temp[1]);
                             msg.setSubject(temp[2]);
                             msg.setMsg(receivePacket.getAddress().getHostAddress());
-                            System.out.println(receivePacket.getAddress().getHostAddress());
                             info.setServerWSIp(receivePacket.getAddress().getHostAddress());
                         }
                         else {
                             if(temp[1].equals("IS_SERVER")){
                                 if(info.isImServer()) {
-                                    System.out.println(temp[2]);
                                     InetAddress clientAddres = InetAddress.getByName(receivePacket.getAddress().getHostAddress());
                                     int clientPort = receivePacket.getPort();
-                                    String respone = "UDP;GUI;SERVER_WORK;127.0.0."+ip;
+                                    String respone = "UDP;GUI;SERVER_WORK";
                                     byte[] sendData = respone.getBytes(StandardCharsets.UTF_8);
                                     sendPacket = new DatagramPacket(sendData, sendData.length, clientAddres, clientPort);
                                     udpSocket.send(sendPacket);
@@ -107,7 +108,7 @@ public class UdpStart {
     }
     public void stopServer() {
         if(th.isAlive())
-            th.interrupt();
+            Alive=false;
     }
 
     public void tiran(int connNumber) throws IOException {
