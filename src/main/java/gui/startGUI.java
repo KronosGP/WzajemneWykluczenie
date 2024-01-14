@@ -25,7 +25,7 @@ public class startGUI extends JFrame {
     private Message msg;
     private Siec siec = null;
     private final JButton Learn;
-
+    private boolean alive=true;
     private final MyComponent komponent;
     private final JLabel wyjscie,ticket,conn;
     private final JFrame frame;
@@ -212,7 +212,7 @@ public class startGUI extends JFrame {
                     }
                 }
                 if(th.isAlive())
-                    th.stop();
+                    alive=false;
                 System.exit(0);
             }
         };
@@ -226,7 +226,7 @@ public class startGUI extends JFrame {
         info=new Info();
         msg=new Message();
 
-        udp=new UdpStart(4444, info,msg,i,true);
+        udp=new UdpStart(4444, info,msg,i,false);
         udp.startServer();
         th =new Thread(()->{
             try {
@@ -237,7 +237,7 @@ public class startGUI extends JFrame {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            while(true){
+            while(alive){
                if(msg.getService().equals("GUI")){
                    if(msg.getSubject()!=null) {
                        System.out.println(msg.getSubject());
