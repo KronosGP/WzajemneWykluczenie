@@ -25,7 +25,7 @@ public class WebSocketClient {
     }
 
     @OnMessage
-    public void onMessage(String message, Session session) throws IOException {
+    public void onMessage(String message, Session session) throws IOException, InterruptedException {
         System.out.println("Otrzymano wiadomość od serwera: " + message);
         String[] temp=message.split(" ");
         if(temp[0].equals("SIEC_SET")) {
@@ -47,10 +47,12 @@ public class WebSocketClient {
         }
         else if(temp[0].equals("YOUR_TICKET")) {
             int tempInt=InteagerParse(temp[1]);
-            if(tempInt>=0 && info.getTicketNumber()>=tempInt)
+            if( info.getTicketNumber()>-1)
                 info.setTicketNumber(info.getTicketNumber()-1);
-            if(info.getTicketNumber()==0)
+            if(info.getTicketNumber()==0) {
+                Thread.sleep(100);
                 s.getBasicRemote().sendText("MY_TURN");
+            }
         }
         else if(temp[0].equals("ACCEPTED")){
             msg.setService("GUI");
@@ -127,7 +129,10 @@ public class WebSocketClient {
 
     public void getTicket() throws IOException {
         if(s.isOpen())
-            s.getBasicRemote().sendText("GET_TICKET");
+            if(info.getTicketNumber()>0)
+                s.getBasicRemote().sendText("MY_TURN");
+            else
+                s.getBasicRemote().sendText("GET_TICKET");
         else
             System.out.println("Sesja zamknięta");
 

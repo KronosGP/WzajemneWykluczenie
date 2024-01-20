@@ -67,8 +67,9 @@ public class WebSocketServer {
         }
         else if(message.equals("RECIVED_SIEC"))
         {
-            broadcast("YOUR_TICKET",session,true);
+            int idTicket=checkNumber(session,true);
             sessions.remove(session);
+            broadcast("YOUR_TICKET "+idTicket,session,true);
         }
         else if(message.equals("GET_TICKET")){
             int ticket=sessions.size();
@@ -80,13 +81,23 @@ public class WebSocketServer {
     @OnClose
     public void onClose(Session session) {
         // Usuń zamkniętą sesję z zestawu sesji
-        if(checkNumber(session,true)==0 && th!=null)
-            if(th.isAlive())
-                th.stop();
-        broadcast("YOUR_TICKET",session,true);
-        broadcast("NEW_NUMBER",session,false);
-        sessionsR.remove(session);
+        try {
+            if (checkNumber(session, true) == 0 && th != null)
+                if (th.isAlive())
+                    th.stop();
+        }catch (Exception ex){}
+
+        int idTicket=checkNumber(session,true);
         sessions.remove(session);
+        System.out.println(sessions);
+        broadcast("YOUR_TICKET "+idTicket,session,true);
+
+        idTicket=checkNumber(session,false);
+        sessionsR.remove(session);
+        System.out.println(sessionsR);
+        broadcast("NEW_NUMBER "+idTicket,session,false);
+
+
 
         System.out.println("Klient odłączony. ID sesji: " + session.getId());
     }
@@ -99,11 +110,11 @@ public class WebSocketServer {
 
     private void broadcast(String message, Session s,Boolean isTicket) {
         // Prześlij wiadomość do wszystkich podłączonych klientów
-        int idTicket=checkNumber(s,isTicket);
+
         for (Session session : sessionsR) {
             try {
                 if(session!=s)
-                    session.getBasicRemote().sendText(message + " " + idTicket);
+                    session.getBasicRemote().sendText(message);
             } catch (IOException e) {
                 System.err.println("Błąd podczas wysyłania wiadomości do klienta.");
                 e.printStackTrace();

@@ -288,6 +288,7 @@ public class startGUI extends JFrame {
                            WSC=null;
                            udp.tiran(info.getConnNumber());
                            msg.ClearValue();
+                           Learn.setEnabled(true);
                        } catch (UnknownHostException e) {
                            throw new RuntimeException(e);
                        } catch (IOException e) {
@@ -295,7 +296,7 @@ public class startGUI extends JFrame {
                        }
                    }
                    else if(msg.getSubject().equals("YOUR_TOUR")){
-                       new Thread(()->JOptionPane.showMessageDialog(null,"Twoje miejsce w kolejce: "+info.getTicketNumber())).start();
+                       //new Thread(()->JOptionPane.showMessageDialog(null,"Twoje miejsce w kolejce: "+info.getTicketNumber())).start();
                        msg.ClearValue();
                    }
                }
